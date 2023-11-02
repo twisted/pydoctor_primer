@@ -12,7 +12,6 @@ def get_projects() -> list[Project]:
         Project(
             location="https://github.com/twisted/twisted",
             pydoctor_cmd="{pydoctor} ./src/twisted", 
-            expected_success=False
         ),
         Project(
             location="https://github.com/twisted/tubes",
@@ -25,9 +24,18 @@ def get_projects() -> list[Project]:
         ),
         Project(
             location="https://github.com/temporalio/sdk-python",
-            pydoctor_cmd=("{pydoctor} --project-base-dir=."), 
-            expected_success=False
+            pydoctor_cmd=("{pydoctor} --project-base-dir=. temporalio"), 
         ),
+        Project(
+            location="https://github.com/agx/git-buildpackage",
+            pydoctor_cmd="{pydoctor} gbp",
+            expected_success=True,
+            revision='debian/0.9.32',
+        ),
+        Project(
+            location="https://github.com/CMA-ES/pycma",
+            pydoctor_cmd="{pydoctor} cma",
+        )
     ]
     assert len(projects) == len({p.name for p in projects})
     return projects
