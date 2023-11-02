@@ -10,17 +10,17 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from mypy_primer.globals import ctx
+from pydoctor_primer.globals import ctx
 
 if sys.platform == "win32":
     import tempfile
 
     BIN_DIR = "scripts"
-    MYPY_EXE_NAME = "mypy.exe"
+    PYDOCTOR_EXE_NAME = "pydoctor.exe"
     TEMP_DIR = tempfile.gettempdir()
 else:
     BIN_DIR = "bin"
-    MYPY_EXE_NAME = "mypy"
+    PYDOCTOR_EXE_NAME = "pydoctor"
     TEMP_DIR = "/tmp"
 
 
