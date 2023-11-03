@@ -84,7 +84,7 @@ def parse_options(argv: list[str]) -> _Args:
 
     proj_group = parser.add_argument_group("project selection")
     proj_group.add_argument(
-        "-k", "--project-selector", help="regex to filter projects (matches against location)"
+        "-k", "--project-selector", help="fnmatch pattern to filter projects (matches against location)"
     )
     proj_group.add_argument(
         "-p",

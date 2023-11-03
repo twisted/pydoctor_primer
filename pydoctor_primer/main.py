@@ -9,6 +9,7 @@ import traceback
 from dataclasses import replace
 from pathlib import Path
 from typing import Awaitable, Iterator, TypeVar
+import fnmatch
 
 from pydoctor_primer.git_utils import (
     RevisionLike,
@@ -67,7 +68,7 @@ def select_projects() -> list[Project]:
     )
     if ARGS.project_selector:
         project_iter = iter(
-            p for p in project_iter if re.search(ARGS.project_selector, p.location, flags=re.I)
+            p for p in project_iter if fnmatch.fnmatch(p.location, ARGS.project_selector)
         )
     if ARGS.expected_success:
         project_iter = (p for p in project_iter if p.expected_success)
@@ -180,7 +181,7 @@ async def bisect() -> None:
     assert repo_dir.is_dir()
 
     projects = select_projects()
-    await asyncio.wait([project.setup() for project in projects])
+    await asyncio.wait([asyncio.Task(project.setup()) for project in projects])
 
     async def run_wrapper(project: Project) -> tuple[str, TypeCheckResult]:
         return project.name, (await project.run_pydoctor(str(exe)))
