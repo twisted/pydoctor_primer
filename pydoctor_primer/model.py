@@ -97,7 +97,9 @@ class Project:
                     print(e.stderr)
                 raise RuntimeError(f"pip install failed for {self.name}") from e
 
-    def get_pydoctor_cmd(self, pydoctor_path: str | Path, additional_flags: Sequence[str] = ()) -> str:
+    def get_pydoctor_cmd(self, pydoctor_path: str | Path, 
+                         additional_flags: Sequence[str],
+                         htmloutput: str) -> str:
         cmd = self.pydoctor_cmd
         assert "{pydoctor}" in self.pydoctor_cmd
         cmd = cmd.format(pydoctor=pydoctor_path)
@@ -105,20 +107,21 @@ class Project:
         if additional_flags:
             cmd += " " + " ".join(additional_flags)
 
-        cmd += " --make-html --quiet"
+        cmd += f" --make-html --quiet --html-output={htmloutput}"
         return cmd
 
-    async def run_pydoctor(self, pydoctor_path: str | Path) -> TypeCheckResult:
+    async def run_pydoctor(self, pydoctor_path: str | Path, htmloutput: str = 'apidocs') -> TypeCheckResult:
         additional_flags = ctx.get().additional_flags.copy()
         env = os.environ.copy()
-
-        cmd = self.get_pydoctor_cmd(pydoctor_path, additional_flags)
+        cmd = self.get_pydoctor_cmd(pydoctor_path, additional_flags, htmloutput)
+        cwd = ctx.get().projects_dir / self.name
+        shutil.rmtree(cwd / htmloutput, ignore_errors=True)
         proc, runtime = await run(
             cmd,
             shell=True,
             output=True,
             check=False,
-            cwd=ctx.get().projects_dir / self.name,
+            cwd=cwd,
             env=env,
         )
         if ctx.get().debug:
@@ -138,11 +141,6 @@ class Project:
             cmd, output, not bool(proc.returncode), self.expected_success, runtime
         )
 
-    async def run_typechecker(
-        self, type_checker: str | Path, 
-    ) -> TypeCheckResult:
-        return await self.run_pydoctor(type_checker)
-
     async def primer_result(
         self,
         new_type_checker: str,
@@ -150,8 +148,8 @@ class Project:
     ) -> PrimerResult:
         await self.setup()
         new_result, old_result = await asyncio.gather(
-            self.run_typechecker(new_type_checker),
-            self.run_typechecker(old_type_checker),
+            self.run_pydoctor(new_type_checker, 'newapidocs'),
+            self.run_pydoctor(old_type_checker, 'oldapidocs'),
         )
         return PrimerResult(self, new_result, old_result)
 
