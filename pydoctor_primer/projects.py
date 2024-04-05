@@ -87,7 +87,7 @@ def get_projects() -> list[Project]:
         ),
         Project(
             location="https://github.com/python-attrs/attrs",
-            pydoctor_cmd="{pydoctor} ./src/attr --docformat=restructuredtext"
+            pydoctor_cmd="{pydoctor} ./src/attr ./src/attrs --docformat=restructuredtext"
         ),
         Project(
             location="https://github.com/pypa/twine",
